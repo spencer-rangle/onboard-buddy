@@ -10,8 +10,8 @@
     </div>
     <ul>
       <li (click)="handleMenuItemClick('')">None</li>
-      <li *ngFor="let personality of personalities" (click)="handleMenuItemClick(personality)">
-        {{ personality }}
+      <li *ngFor="let personality of personalities" (click)="handleMenuItemClick(personality.prompt)">
+        {{ personality.name }}
       </li>
     </ul>
   </div>

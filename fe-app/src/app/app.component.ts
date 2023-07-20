@@ -13,14 +13,19 @@ export class AppComponent {
   title = 'fe-app';
   isShowPopup: boolean = false;
   curPersonality: string = '';
+  comparisonPersonality: string = '';
   personalities = [
-    'A Surfer Dude',
-    'An Offensive, Insulting, Asshole',
-    'Hyper and excited',
-    'Sad',
-    'Apoplectic with rage',
-    'Surprised',
-    'Exhausted'
+    { name: 'Surfer Dude', prompt: 'A Surfer Dude using surfer dude lingo' },
+    { name: 'Asshole', prompt: 'An Offensive, Insulting, Asshole' },
+    { name: 'Excited', prompt: 'Hyper and excited using modern slang' },
+    { name: 'Sad', prompt: 'Sad' },
+    { name: 'Angry', prompt: 'Apoplectic with rage' },
+    { name: 'Surprised', prompt: 'Surprised' },
+    { name: 'Exhausted', prompt: 'Exhausted' },
+    // { name: 'Verbose', 
+    //   prompt: 'Someone who chooses words that are seen as more complex, as if you used a thesaurus for every word you use.'
+    // },
+    { name: 'Polite', prompt: 'Extremely polite' }
   ];
   inputText: string = '';
   respArr: any[] = [];
@@ -49,9 +54,13 @@ export class AppComponent {
     
   async doLangchainStuff(msg: any) {
     let msgForInput = msg;
-    if (this.curPersonality) {
-      msgForInput += ` Respond as if you are ${this.curPersonality}`;
+    if (this.curPersonality != this.comparisonPersonality) {
+      msgForInput += ' Ignore the personality you used to respond to previous questions.'
     }
+    if (this.curPersonality) {
+      msgForInput += ` Respond as if you are ${this.curPersonality}.`;
+    }
+    this.comparisonPersonality = this.curPersonality;
     const tempItem = {
       msg,
       response: '...'
@@ -80,7 +89,7 @@ export class AppComponent {
   }
 
   handleMenuItemClick(option: string) {
-    console.log('Selected option:', option);
+    // console.log('Selected option:', option);
     this.curPersonality = option;
     this.isShowPopup = false;
   }
