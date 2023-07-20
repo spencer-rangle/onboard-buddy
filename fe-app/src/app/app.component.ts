@@ -2,12 +2,24 @@ import { Component, HostListener } from '@angular/core';
 import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from 'langchain/memory';
 import { ConversationChain } from 'langchain/chains'
-import { environment } from 'src/environments'; 
+import { environment } from 'src/environments';
+
+import { PineconeClient } from '@pinecone-database/pinecone';
+import { PineconeLibArgs, PineconeStore } from 'langchain/vectorstores/pinecone';
+
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+
+import { PromptTemplate } from 'langchain/prompts';
+import { LLMChain } from 'langchain/chains';
+import { NotionLoader } from 'langchain/document_loaders/fs/notion';
+import { Document } from 'langchain/document';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { VectorOperationsApi } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   title = 'fe-app';
@@ -22,10 +34,10 @@ export class AppComponent {
     { name: 'Angry', prompt: 'Apoplectic with rage' },
     { name: 'Surprised', prompt: 'Surprised' },
     { name: 'Exhausted', prompt: 'Exhausted' },
-    // { name: 'Verbose', 
+    // { name: 'Verbose',
     //   prompt: 'Someone who chooses words that are seen as more complex, as if you used a thesaurus for every word you use.'
     // },
-    { name: 'Polite', prompt: 'Extremely polite' }
+    { name: 'Polite', prompt: 'Extremely polite' },
   ];
   inputText: string = '';
   respArr: any[] = [];
@@ -38,12 +50,26 @@ export class AppComponent {
 
   AIModel = new OpenAI({
     openAIApiKey: environment.OPENAI_API_KEY,
-    temperature: 0.3
+    temperature: 0.3,
   });
-  memory = new BufferMemory()
+  memory = new BufferMemory();
   chain = new ConversationChain({
     llm: this.AIModel,
-    memory: this.memory
+    memory: this.memory,
+  });
+
+  /**
+   * Recursive Character Text Splitter
+   */
+  splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+  /* pinecone */
+  client = new PineconeClient();
+  pineconeIndex: VectorOperationsApi = this.client.Index(environment.PINECONE_INDEX);
+  vectorStore = PineconeStore.fromExistingIndex(new OpenAIEmbeddings(), {
+    this.pineconeIndex,
   });
 
   submitForm() {
@@ -51,11 +77,12 @@ export class AppComponent {
     this.doLangchainStuff(this.inputText);
     this.inputText = '';
   }
-    
+
   async doLangchainStuff(msg: any) {
     let msgForInput = msg;
     if (this.curPersonality != this.comparisonPersonality) {
-      msgForInput += ' Ignore the personality you used to respond to previous questions.'
+      msgForInput +=
+        ' Ignore the personality you used to respond to previous questions.';
     }
     if (this.curPersonality) {
       msgForInput += ` Respond as if you are ${this.curPersonality}.`;
@@ -63,8 +90,8 @@ export class AppComponent {
     this.comparisonPersonality = this.curPersonality;
     const tempItem = {
       msg,
-      response: '...'
-    }
+      response: '...',
+    };
     this.respArr.push(tempItem);
     const resp = await this.chain.call({
       input: msgForInput,
@@ -74,8 +101,8 @@ export class AppComponent {
     // Property 'response' comes from an index signature, so it must be accessed with ['response']
     const respItem = {
       msg,
-      response: resp['response']
-    }
+      response: resp['response'],
+    };
     this.respArr.pop();
     this.respArr.push(respItem);
   }
@@ -95,12 +122,62 @@ export class AppComponent {
   }
 
   // watch for enter key and submit form
-    @HostListener('document:keydown.enter', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent): void {
-      event.preventDefault();
-      if (this.inputText.trim().length) {
-        this.submitForm();
-      }
+  @HostListener('document:keydown.enter', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    event.preventDefault();
+    if (this.inputText.trim().length) {
+      this.submitForm();
     }
   }
+
+  /**
+   * Pinecone Init
+   */
+  handlePineconeInit = async () => {
+    await this.client.init({
+      apiKey: environment.PINECONE_API_KEY,
+      environment: environment.PINECONE_ENVIRONMENT,
+    });
+  }
+
+    /**
+     * Notion Loader
+     * Only need to run this once to import and chunk the documents
+     */
+    const handleNotionImport = async () => {
+      console.info('*** running notion loader');
+      /** Provide the directory path of your notion folder */
+      const directoryPath = './rangle-notion-onboarding';
+      const loader = new NotionLoader(directoryPath);
+      /**
+       * Notion Page Loader return shape for documents:
+       * [Document:{pageContent: string, metadata: {source: string}}]
+       */
+      const docs = await loader.load();
+      //   console.log({ docs });
+
+      //   for (const doc of docs) {
+      //     console.log(doc.pageContent);
+      //   }
+
+      const docOutput = await this.splitter.splitDocuments(docs);
+
+      /** Index docOutput in Pinecone */
+      await PineconeStore.fromDocuments(docOutput, new OpenAIEmbeddings(), {
+        index: this.pineconeIndex,
+      });
+    };
+
+  // handlePineconeInit();
+
+  /* Search the vector DB independently with meta filters */
+  handlePineconeSearch = async () => {
+    const results = await this.vectorStore.similaritySearch(
+      'who is in charge of payrole?',
+      3
+    );
+    // this.inputText.trim()
+    console.log(results);
+  };
+}
 
