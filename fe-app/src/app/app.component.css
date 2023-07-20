@@ -1,4 +1,7 @@
-
+* {
+  margin: 0;
+  padding: 0;
+}
 
 .toolbar {
   position: absolute;
@@ -11,6 +14,60 @@
   background-color: #1976d2;
   color: white;
   font-weight: 600;
+}
+
+.popup-btn {
+  margin-left: 20px;
+  padding: 10px;
+  background-color: salmon;
+  color: white;
+  font-size: 20px;
+  font-weight: 200;
+}
+
+.pop-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(100, 100, 100, 0.35);
+}
+
+.popup {
+  position: absolute;
+  left: calc(50% - 300px);
+  top: calc(50% - 350px);
+  width: 600px;
+  height: 600px;
+  border: 2px solid lightgray;
+  border-radius: 10px;
+  list-style: none;
+  background-color: #f2f2f2;
+  font-family: Arial, Helvetica, sans-serif; 
+  font-size: 20px;
+}
+
+.pop-desc {
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 30px;
+  text-align: center;
+}
+
+.popup > ul {
+  list-style: none;
+  padding-bottom: 10px;
+}
+
+.popup > ul > li {
+  cursor: pointer;
+  padding: 15px 30px;
+}
+
+.popup > ul > li:hover {
+  background-color: cornflowerblue;
+  color: white;
 }
 
 .card {
@@ -77,9 +134,7 @@ footer a {
   align-items: center;
 }
 
-
 .content {
-  /* display: flex; */
   margin: 82px auto 32px;
   padding: 0 16px;
   max-width: 960px;
@@ -87,7 +142,6 @@ footer a {
   align-items: center;
   font-family: Arial, Helvetica, sans-serif;
 }
-
 
 .response-container {
   width: 100%;
@@ -97,8 +151,6 @@ footer a {
 
 .item {
   width: 100%;
-  /* padding: 20px; */
-  /* border-bottom: 1px solid lightgray; */
 }
 
 .item-msg {
@@ -111,20 +163,8 @@ footer a {
   width: 100%;
   padding: 20px;
   background-color: #f2f2f2;
-  text-align: right;
   border-bottom: 1px solid lightgray;
 }
-
-
-/* .item:nth-child(even) { */
-  /* width: 100%; */
-  /* background-color: #f2f2f2; */
-/* } */
-
-
-
-
-
 
 .footer {
   position: fixed;
@@ -143,10 +183,10 @@ footer a {
 }
 
 .footer textarea[type="text"] {
-  /* flex-grow: 1; */
   min-height: 60px;
   width: calc(100% - 200px);
   margin-right: 10px;
+  padding: 5px;
   font-size: 18px;
   overflow-y: scroll;
   word-wrap: break-word;

@@ -1,7 +1,20 @@
-
 <!-- Toolbar -->
 <div class="toolbar" role="banner">
+  <button class="popup-btn" (click)="togglePopup()">Personality</button>
+</div>
 
+<div *ngIf="isShowPopup" class="pop-overlay" (click)="hidePopup()">
+  <div class="popup" id="popupMenu">
+    <div class="pop-desc">
+      <span>Select Chatbot Personality</span>
+    </div>
+    <ul>
+      <li (click)="handleMenuItemClick('')">None</li>
+      <li *ngFor="let personality of personalities" (click)="handleMenuItemClick(personality)">
+        {{ personality }}
+      </li>
+    </ul>
+  </div>
 </div>
 
 <div class="content" role="main">
@@ -16,7 +29,6 @@
     </div>
   </div>
 
-
   <!-- Footer -->
   <footer class="footer">
     <form (submit)="submitForm()">
@@ -29,6 +41,5 @@
     </form>
   </footer>
 </div>
-
 
 <router-outlet></router-outlet>
