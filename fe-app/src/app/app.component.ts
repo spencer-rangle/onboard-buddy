@@ -93,4 +93,14 @@ export class AppComponent {
     this.curPersonality = option;
     this.isShowPopup = false;
   }
-}
+
+  // watch for enter key and submit form
+    @HostListener('document:keydown.enter', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent): void {
+      event.preventDefault();
+      if (this.inputText.trim().length) {
+        this.submitForm();
+      }
+    }
+  }
+
