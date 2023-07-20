@@ -34,7 +34,7 @@ const splitter = new RecursiveCharacterTextSplitter({
 /**
  * Notion Loader
  */
-export const run = async () => {
+const importNotionDocs = async () => {
   console.info("*** running notion loader2");
   /** Provide the directory path of your notion folder */
   const directoryPath = "./rangle-notion-onboarding";
@@ -57,8 +57,8 @@ export const run = async () => {
     pineconeIndex,
   });
 };
-
-// run();
+/* only needs to be run when new docs are added to the notion folder */
+// importNotionDocs();
 
 /* query pinecone store */
 const vectorStore = await PineconeStore.fromExistingIndex(

@@ -67,10 +67,29 @@ export class AppComponent {
   });
   /* pinecone */
   client = new PineconeClient();
-  pineconeIndex: VectorOperationsApi = this.client.Index(environment.PINECONE_INDEX);
-  vectorStore = PineconeStore.fromExistingIndex(new OpenAIEmbeddings(), {
-    this.pineconeIndex,
-  });
+
+  private pineconeIndex: VectorOperationsApi = this.client.Index(
+    environment.PINECONE_INDEX
+  );
+  pineconeArgs: PineconeLibArgs = {
+    pineconeIndex: this.pineconeIndex,
+  };
+  vectorStore = PineconeStore.fromExistingIndex(
+    new OpenAIEmbeddings(),
+    this.pineconeArgs
+  );
+
+  ngOnInit(): void {
+    /**
+     * Pinecone Init
+     */
+    this.client.init({
+      apiKey: environment.PINECONE_API_KEY,
+      environment: environment.PINECONE_ENVIRONMENT,
+    });
+
+    // this.handlePineconeSearch();
+  }
 
   submitForm() {
     console.log('Submitted: ', this.inputText);
@@ -131,53 +150,47 @@ export class AppComponent {
   }
 
   /**
-   * Pinecone Init
+   * Notion Loader
+   * Only need to run this once to import and chunk the documents
    */
-  handlePineconeInit = async () => {
-    await this.client.init({
-      apiKey: environment.PINECONE_API_KEY,
-      environment: environment.PINECONE_ENVIRONMENT,
-    });
-  }
-
+  importNotionDocs = async () => {
+    console.info('*** running notion loader');
+    /** Provide the directory path of your notion folder */
+    const directoryPath = './rangle-notion-onboarding';
+    const loader = new NotionLoader(directoryPath);
     /**
-     * Notion Loader
-     * Only need to run this once to import and chunk the documents
+     * Notion Page Loader return shape for documents:
+     * [Document:{pageContent: string, metadata: {source: string}}]
      */
-    const handleNotionImport = async () => {
-      console.info('*** running notion loader');
-      /** Provide the directory path of your notion folder */
-      const directoryPath = './rangle-notion-onboarding';
-      const loader = new NotionLoader(directoryPath);
-      /**
-       * Notion Page Loader return shape for documents:
-       * [Document:{pageContent: string, metadata: {source: string}}]
-       */
-      const docs = await loader.load();
-      //   console.log({ docs });
+    const docs = await loader.load();
+    //   console.log({ docs });
 
-      //   for (const doc of docs) {
-      //     console.log(doc.pageContent);
-      //   }
+    //   for (const doc of docs) {
+    //     console.log(doc.pageContent);
+    //   }
 
-      const docOutput = await this.splitter.splitDocuments(docs);
+    const docOutput = await this.splitter.splitDocuments(docs);
 
-      /** Index docOutput in Pinecone */
-      await PineconeStore.fromDocuments(docOutput, new OpenAIEmbeddings(), {
-        index: this.pineconeIndex,
-      });
-    };
-
-  // handlePineconeInit();
+    /** Index docOutput in Pinecone */
+    await PineconeStore.fromDocuments(
+      docOutput,
+      new OpenAIEmbeddings(),
+      this.pineconeArgs
+    );
+  };
+  /* only needs to be run when new docs are added to the notion folder */
+  // importNotionDocs();
 
   /* Search the vector DB independently with meta filters */
   handlePineconeSearch = async () => {
-    const results = await this.vectorStore.similaritySearch(
-      'who is in charge of payrole?',
+    const results = (await this.vectorStore).similaritySearch(
+      // this.inputText.trim(),
+      "who's in charge of payrole?",
       3
     );
-    // this.inputText.trim()
     console.log(results);
+
+    // TODO - pass results + textInput to chatGPT
   };
 }
 
