@@ -5,7 +5,7 @@ import { BufferMemory } from 'langchain/memory';
 import { ConversationChain } from 'langchain/chains'
 import { environment } from 'src/environments';
 import { PineconeService } from './services/pinecone.service';
-
+import docStringer from './app-doc';
 
 type PersonalityOption = {
   name: string,
@@ -76,8 +76,11 @@ export class AppComponent {
   }
     
   async doLangchainStuff(msg: any) {
+    console.warn('LANGCHAING STUFF')
     let msgForInput = msg;
-
+    if (this.isOnboardHelp) {
+      msgForInput += ' Here is the main material to look in: ' + docStringer;
+    }
     if (this.curPersonalityStr != this.comparisonPersonality) {
       msgForInput += ' Ignore the personality you used to respond to previous questions.'
     }
