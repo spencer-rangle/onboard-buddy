@@ -1,21 +1,32 @@
 import { Component, HostListener } from '@angular/core';
-import { OpenAI } from 'langchain/llms/openai';
+import { HttpClient } from '@angular/common/http';
+import { OpenAI } from "langchain/llms/openai";
 import { BufferMemory } from 'langchain/memory';
-import { ConversationChain } from 'langchain/chains';
-import { environment } from '../environments/environments';
+import { ConversationChain } from 'langchain/chains'
+import { environment } from 'src/environments';
 import { PineconeService } from './services/pinecone.service';
+
+
+type PersonalityOption = {
+  name: string,
+  prompt: string
+}
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
   title = 'fe-app';
   isShowPopup: boolean = false;
-  curPersonality: string = '';
+  isOnboardHelp: boolean = false;
+  sliderValue: number = 50;
+  curPersonalityName: string = '';
+  curPersonalityStr: string = '';
   comparisonPersonality: string = '';
-  personalities = [
+  personalities: PersonalityOption[] = [
     { name: 'Surfer Dude', prompt: 'A Surfer Dude using surfer dude lingo' },
     { name: 'Asshole', prompt: 'An Offensive, Insulting, Asshole' },
     { name: 'Excited', prompt: 'Hyper and excited using modern slang' },
@@ -23,10 +34,10 @@ export class AppComponent {
     { name: 'Angry', prompt: 'Apoplectic with rage' },
     { name: 'Surprised', prompt: 'Surprised' },
     { name: 'Exhausted', prompt: 'Exhausted' },
-    // { name: 'Verbose',
+    // { name: 'Verbose', 
     //   prompt: 'Someone who chooses words that are seen as more complex, as if you used a thesaurus for every word you use.'
     // },
-    { name: 'Polite', prompt: 'Extremely polite' },
+    { name: 'Polite', prompt: 'Extremely polite' }
   ];
   inputText: string = '';
   respArr: any[] = [];
@@ -39,12 +50,12 @@ export class AppComponent {
 
   AIModel = new OpenAI({
     openAIApiKey: environment.OPENAI_API_KEY,
-    temperature: 0.3,
+    temperature: 0.3
   });
-  memory = new BufferMemory();
+  memory = new BufferMemory()
   chain = new ConversationChain({
     llm: this.AIModel,
-    memory: this.memory,
+    memory: this.memory
   });
 
   constructor(private pineconeService: PineconeService) {}
@@ -63,21 +74,21 @@ export class AppComponent {
     this.doLangchainStuff(this.inputText);
     this.inputText = '';
   }
-
+    
   async doLangchainStuff(msg: any) {
     let msgForInput = msg;
-    if (this.curPersonality != this.comparisonPersonality) {
-      msgForInput +=
-        ' Ignore the personality you used to respond to previous questions.';
+
+    if (this.curPersonalityStr != this.comparisonPersonality) {
+      msgForInput += ' Ignore the personality you used to respond to previous questions.'
     }
-    if (this.curPersonality) {
-      msgForInput += ` Respond as if you are ${this.curPersonality}.`;
+    if (this.curPersonalityStr) {
+      msgForInput += ` Respond as if you are ${this.curPersonalityStr}.`;
     }
-    this.comparisonPersonality = this.curPersonality;
+    this.comparisonPersonality = this.curPersonalityStr;
     const tempItem = {
       msg,
-      response: '...',
-    };
+      response: '...'
+    }
     this.respArr.push(tempItem);
     const resp = await this.chain.call({
       input: msgForInput,
@@ -87,8 +98,8 @@ export class AppComponent {
     // Property 'response' comes from an index signature, so it must be accessed with ['response']
     const respItem = {
       msg,
-      response: resp['response'],
-    };
+      response: resp['response']
+    }
     this.respArr.pop();
     this.respArr.push(respItem);
   }
@@ -101,11 +112,17 @@ export class AppComponent {
     this.isShowPopup = false;
   }
 
-  handleMenuItemClick(option: string) {
-    // console.log('Selected option:', option);
-    this.curPersonality = option;
+  handleMenuItemClick(option: PersonalityOption) {
+    this.curPersonalityName = option.name;
+    this.curPersonalityStr = option.prompt;
     this.isShowPopup = false;
   }
+
+  toggleOnboarding() {
+    this.isOnboardHelp = !this.isOnboardHelp;
+  }
+
+
 
   // watch for enter key and submit form
   @HostListener('document:keydown.enter', ['$event'])

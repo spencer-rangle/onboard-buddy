@@ -14,59 +14,7 @@
   background-color: #1976d2;
   color: white;
   font-weight: 600;
-  font-size: 20px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: 300;
-
 }
-
-
-.personality-span {
-  width: 200px;
-  margin-left: 40px;
-  font-size: 20px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: 300;
-}
-
-.onboard-container {
-  cursor: pointer;
-}
-
-.onboard-title {
-  margin-right: 20px;
-  vertical-align: center;
-}
-
-.onboard-true {
-  font-size: 30px;
-  color: green;
-  background-color: lightseagreen;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.onboard-false {
-  font-size: 30px;
-  color: red;
-  background-color: pink;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.onboard-container {
-  margin-left: 40px;
-}
-
-.slider-container {
-  margin-left: 50px;
-}
-
-
-
-
-
-
 
 .popup-btn {
   margin-left: 20px;
@@ -75,7 +23,6 @@
   color: white;
   font-size: 20px;
   font-weight: 200;
-  cursor: pointer;
 }
 
 .pop-overlay {
