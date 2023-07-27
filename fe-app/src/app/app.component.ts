@@ -5,7 +5,7 @@ import { BufferMemory } from 'langchain/memory';
 import { ConversationChain } from 'langchain/chains'
 import { environment } from 'src/environments';
 import { PineconeService } from './services/pinecone.service';
-import docStringer from './app-doc';
+import { docCategories, docContent } from './app-doc';
 
 type PersonalityOption = {
   name: string,
@@ -21,12 +21,13 @@ export class AppComponent {
 
   title = 'fe-app';
   isShowPopup: boolean = false;
-  isOnboardHelp: boolean = false;
+  isOnboardHelp: boolean = true;
   sliderValue: number = 50;
   curPersonalityName: string = '';
   curPersonalityStr: string = '';
   comparisonPersonality: string = '';
   personalities: PersonalityOption[] = [
+    { name: 'Patronizing', prompt: 'Explain it to me as if I were a 5 year-old' },
     { name: 'Surfer Dude', prompt: 'A Surfer Dude using surfer dude lingo' },
     { name: 'Asshole', prompt: 'An Offensive, Insulting, Asshole' },
     { name: 'Excited', prompt: 'Hyper and excited using modern slang' },
@@ -74,25 +75,45 @@ export class AppComponent {
     this.doLangchainStuff(this.inputText);
     this.inputText = '';
   }
+
+
+  // Chaining time
     
   async doLangchainStuff(msg: any) {
-    console.warn('LANGCHAING STUFF')
     let msgForInput = msg;
-    if (this.isOnboardHelp) {
-      msgForInput += ' Here is the main material to look in: ' + docStringer;
-    }
-    if (this.curPersonalityStr != this.comparisonPersonality) {
-      msgForInput += ' Ignore the personality you used to respond to previous questions.'
-    }
-    if (this.curPersonalityStr) {
-      msgForInput += ` Respond as if you are ${this.curPersonalityStr}.`;
-    }
-    this.comparisonPersonality = this.curPersonalityStr;
     const tempItem = {
       msg,
       response: '...'
     }
     this.respArr.push(tempItem);
+
+
+    if (this.isOnboardHelp) {
+      const midMsg = msg
+        + ` Which of the below array of keywords most relates to the question above?
+          Respond with only the number representing the array and nothing else.
+          If you are not sure which relates most to the question above, then return '-1'`
+        + docCategories;
+      
+      const midResp = await this.chain.call({
+        input: midMsg,
+      });
+      if (midResp['response'] == '-1') {
+        let allContent = '';
+        docContent.forEach(item => allContent += item)
+        msgForInput += allContent;
+      } else {
+        msgForInput += ' Here is the main material to look in: ';
+        msgForInput += docContent[parseInt(midResp['response'])];
+      }
+    }
+    if (this.curPersonalityStr != this.comparisonPersonality) {
+      msgForInput += ' Ignore the personality you used to respond to previous questions.'
+      this.comparisonPersonality = this.curPersonalityStr;
+    }
+    if (this.curPersonalityStr) {
+      msgForInput += ` Respond as if you are ${this.curPersonalityStr}.`;
+    }
     const resp = await this.chain.call({
       input: msgForInput,
     });
