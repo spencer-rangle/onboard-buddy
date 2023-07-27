@@ -1,20 +1,9 @@
 import { Component, HostListener } from '@angular/core';
-import { OpenAI } from "langchain/llms/openai";
+import { OpenAI } from 'langchain/llms/openai';
 import { BufferMemory } from 'langchain/memory';
-import { ConversationChain } from 'langchain/chains'
-import { environment } from 'src/environments';
-
-import { PineconeClient } from '@pinecone-database/pinecone';
-import { PineconeLibArgs, PineconeStore } from 'langchain/vectorstores/pinecone';
-
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-
-import { PromptTemplate } from 'langchain/prompts';
-import { LLMChain } from 'langchain/chains';
-import { NotionLoader } from 'langchain/document_loaders/fs/notion';
-import { Document } from 'langchain/document';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { VectorOperationsApi } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
+import { ConversationChain } from 'langchain/chains';
+import { environment } from '../environments/environments';
+import { PineconeService } from './services/pinecone.service';
 
 @Component({
   selector: 'app-root',
@@ -58,37 +47,15 @@ export class AppComponent {
     memory: this.memory,
   });
 
-  /**
-   * Recursive Character Text Splitter
-   */
-  splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 200,
-  });
-  /* pinecone */
-  client = new PineconeClient();
+  constructor(private pineconeService: PineconeService) {}
 
-  private pineconeIndex: VectorOperationsApi = this.client.Index(
-    environment.PINECONE_INDEX
-  );
-  pineconeArgs: PineconeLibArgs = {
-    pineconeIndex: this.pineconeIndex,
-  };
-  vectorStore = PineconeStore.fromExistingIndex(
-    new OpenAIEmbeddings(),
-    this.pineconeArgs
-  );
-
-  ngOnInit(): void {
-    /**
-     * Pinecone Init
-     */
-    this.client.init({
-      apiKey: environment.PINECONE_API_KEY,
-      environment: environment.PINECONE_ENVIRONMENT,
-    });
-
-    // this.handlePineconeSearch();
+  async ngOnInit(): Promise<void> {
+    await this.pineconeService.initializePinecone();
+    // const results = await this.pineconeService.pineconeQuery(
+    //   'company address?',
+    //   3
+    // );
+    // console.log(results);
   }
 
   submitForm() {
@@ -149,48 +116,15 @@ export class AppComponent {
     }
   }
 
-  /**
-   * Notion Loader
-   * Only need to run this once to import and chunk the documents
-   */
-  importNotionDocs = async () => {
-    console.info('*** running notion loader');
-    /** Provide the directory path of your notion folder */
-    const directoryPath = './rangle-notion-onboarding';
-    const loader = new NotionLoader(directoryPath);
-    /**
-     * Notion Page Loader return shape for documents:
-     * [Document:{pageContent: string, metadata: {source: string}}]
-     */
-    const docs = await loader.load();
-    //   console.log({ docs });
-
-    //   for (const doc of docs) {
-    //     console.log(doc.pageContent);
-    //   }
-
-    const docOutput = await this.splitter.splitDocuments(docs);
-
-    /** Index docOutput in Pinecone */
-    await PineconeStore.fromDocuments(
-      docOutput,
-      new OpenAIEmbeddings(),
-      this.pineconeArgs
-    );
-  };
-  /* only needs to be run when new docs are added to the notion folder */
-  // importNotionDocs();
-
   /* Search the vector DB independently with meta filters */
-  handlePineconeSearch = async () => {
-    const results = (await this.vectorStore).similaritySearch(
-      // this.inputText.trim(),
-      "who's in charge of payrole?",
-      3
-    );
-    console.log(results);
+  // handlePineconeSearch = async () => {
+  //   const results = (await this.vectorStore).similaritySearch(
+  //     // this.inputText.trim(),
+  //     "who's in charge of payrole?",
+  //     3
+  //   );
+  //   console.log(results);
 
-    // TODO - pass results + textInput to chatGPT
-  };
+  //   // TODO - pass results + textInput to chatGPT
+  // };
 }
-

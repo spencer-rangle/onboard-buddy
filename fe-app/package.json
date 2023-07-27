@@ -19,7 +19,6 @@
     "@angular/platform-browser-dynamic": "^15.1.0",
     "@angular/router": "^15.1.0",
     "@pinecone-database/pinecone": "^0.1.6",
-    "langchain": "0.0.108",
     "openai": "^3.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -36,7 +35,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
-    "langchain": "0.0.108",
+    "langchain": "^0.0.114",
     "typescript": "~4.9.4"
   }
 }

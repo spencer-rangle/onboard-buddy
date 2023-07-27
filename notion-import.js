@@ -31,35 +31,6 @@ const splitter = new RecursiveCharacterTextSplitter({
   chunkOverlap: 200,
 });
 
-/**
- * Notion Loader
- */
-const importNotionDocs = async () => {
-  console.info("*** running notion loader2");
-  /** Provide the directory path of your notion folder */
-  const directoryPath = "./rangle-notion-onboarding";
-  const loader = new NotionLoader(directoryPath);
-  /**
-   * Notion Page Loader return shape for documents:
-   * [Document:{pageContent: string, metadata: {source: string}}]
-   */
-  const docs = await loader.load();
-  //   console.log({ docs });
-
-  //   for (const doc of docs) {
-  //     console.log(doc.pageContent);
-  //   }
-
-  const docOutput = await splitter.splitDocuments(docs);
-
-  /** Index docOutput in Pinecone */
-  await PineconeStore.fromDocuments(docOutput, new OpenAIEmbeddings(), {
-    pineconeIndex,
-  });
-};
-/* only needs to be run when new docs are added to the notion folder */
-// importNotionDocs();
-
 /* query pinecone store */
 const vectorStore = await PineconeStore.fromExistingIndex(
   new OpenAIEmbeddings(),
@@ -67,8 +38,52 @@ const vectorStore = await PineconeStore.fromExistingIndex(
 );
 
 /* Search the vector DB independently with meta filters */
-const results = await vectorStore.similaritySearch("who is in charge of payrole?", 3);
+const results = await vectorStore.similaritySearch("company address?", 3);
 console.log(results);
+
+/**
+ * Import to Pinecone
+ */
+const handlePineconeImport = async (docOutput) => {
+  console.log("*** handlePineconeImport");
+  /** Index docOutput in Pinecone */
+  await PineconeStore.fromDocuments(docOutput, new OpenAIEmbeddings(), {
+    pineconeIndex,
+  });
+};
+
+/**
+ * Text Splitter
+ */
+const handleTextSplitter = async (docs) => {
+  console.log("*** handleTextSplitter");
+  const docOutput = await splitter.splitDocuments(docs);
+
+  handlePineconeImport(docOutput);
+};
+
+/**
+ * Notion Loader
+ */
+const handleImportNotionDocs = async () => {
+  console.info("*** importNotionDocs");
+  /** Provide the directory path of your notion folder */
+  const directoryPath = "./ABC-Company-Notion";
+  const loader = new NotionLoader(directoryPath);
+  /**
+   * Notion Page Loader return shape for documents:
+   * [Document:{pageContent: string, metadata: {source: string}}]
+   */
+  const docs = await loader.load();
+  // console.log({ docs });
+
+  // for (const doc of docs) {
+  //   console.log(doc.pageContent);
+  // }
+  handleTextSplitter(docs);
+};
+/* only needs to be run when new docs are added to the notion folder */
+// handleImportNotionDocs();
 
 // orginal document length = 180
 // chunked length = 258

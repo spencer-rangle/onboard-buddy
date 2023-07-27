@@ -1,7 +1,7 @@
 import { NgModule, InjectionToken } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { environment } from 'src/environments';
+import { environment } from 'src/environments/environments';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -9,17 +9,11 @@ import { AppComponent } from './app.component';
 export const OPENAI_API_KEY = new InjectionToken<string>('OPENAI_API_KEY');
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, AppRoutingModule],
   providers: [
     { provide: OPENAI_API_KEY, useValue: environment.OPENAI_API_KEY },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
