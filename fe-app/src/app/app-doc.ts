@@ -1,42 +1,8 @@
-// Which of the array of keywords most relates to the question above? Respond with only the number representing the array.
-
-// Categories of docContent with array of key words
-// export const docCategories = {
-//   mentorship1: ['mentor', 'mentorship'],
-//   companyIntro2: ['welcome message', 'intro', 'mission', 'vision', 'value'],
-//   deptHandbook3: ['department list',
-  // 'department heads',
-  // ` Sales and Marketing,
-  //   Product Development,
-  //   Operations and Logistics,
-  //   Finance and Accounting,
-  //   Human Resources,
-  //   Customer Support`,
-  // 'handbook topics'],
-//   codeOfConduct4: ['code of conduct', 'office hours', 'dress code', 'complaint'],
-//   empBenefits5: ['benefits',  'insurance',  'compensation',  'retirement', 'workspace', 'tools and software', 'security guidelines', 'company culture', 'personal growth'],
-//   histEvalActivities6: ['Company History', 'performance evaluation', 'engagement initiatives']
-// }
-
-// export const docCategories = [
-//  ['mentor', 'mentorship'],
-//  ['welcome message', 'intro', 'mission', 'vision', 'value'],
-//  ['department list',
-//   'department heads',
-//   ` Sales and Marketing,
-//     Product Development,
-//     Operations and Logistics,
-//     Finance and Accounting,
-//     Human Resources,
-//     Customer Support`,
-//   'handbook topics'],
-//  ['code of conduct', 'office hours', 'dress code', 'complaint'],
-//  ['benefits',  'insurance',  'compensation',  'retirement', 'workspace', 'tools and software', 'security guidelines', 'company culture', 'personal growth'],
-//  ['Company History', 'performance evaluation', 'engagement initiatives']
-// ]
+// When a question is submitted, docCategories is used first to find the chunk of docContent most relates to the question
+// Once the keywords are selected, that number is used append the resulting docContent string
 export const docCategories = `
   0: ['mentor', 'mentorship'],
-  1: ['welcome message', 'intro', 'mission', 'vision', 'value'],
+  1: ['CEO', 'welcome message', 'intro', 'mission', 'vision', 'value'],
   2: ['department list',
   'department heads',
   "Sales and Marketing,
@@ -49,7 +15,6 @@ export const docCategories = `
   3: ['code of conduct', 'office hours', 'dress code', 'complaint'],
   4: ['benefits',  'insurance',  'compensation',  'retirement', 'workspace', 'tools and software', 'security guidelines', 'company culture', 'personal growth'],
   5: ['founded', 'founder', 'Company History', 'performance evaluation', 'engagement initiatives']`
-
 
 
 export const docContent = [

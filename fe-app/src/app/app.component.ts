@@ -18,10 +18,8 @@ type PersonalityOption = {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-
-  title = 'fe-app';
   isShowPopup: boolean = false;
-  isOnboardHelp: boolean = true;
+  isOnboardHelp: boolean = false;
   sliderValue: number = 50;
   curPersonalityName: string = '';
   curPersonalityStr: string = '';
@@ -35,6 +33,7 @@ export class AppComponent {
     { name: 'Angry', prompt: 'Apoplectic with rage' },
     { name: 'Surprised', prompt: 'Surprised' },
     { name: 'Exhausted', prompt: 'Exhausted' },
+    // V Didn't get this to work as desired
     // { name: 'Verbose', 
     //   prompt: 'Someone who chooses words that are seen as more complex, as if you used a thesaurus for every word you use.'
     // },
@@ -42,12 +41,6 @@ export class AppComponent {
   ];
   inputText: string = '';
   respArr: any[] = [];
-  // Practice array
-  // respArr: any[] = [
-  //   { msg: 'What is your name?', response: 'I don\'t know my name' },
-  //   { msg: 'What name would you like to have?', response: 'Walbrot Von Yonsol' },
-  //   { msg: 'Another one', response: 'Yup, here it is' }
-  // ];
 
   AIModel = new OpenAI({
     openAIApiKey: environment.OPENAI_API_KEY,
@@ -76,9 +69,7 @@ export class AppComponent {
     this.inputText = '';
   }
 
-
   // Chaining time
-    
   async doLangchainStuff(msg: any) {
     let msgForInput = msg;
     const tempItem = {
@@ -145,8 +136,6 @@ export class AppComponent {
   toggleOnboarding() {
     this.isOnboardHelp = !this.isOnboardHelp;
   }
-
-
 
   // watch for enter key and submit form
   @HostListener('document:keydown.enter', ['$event'])
