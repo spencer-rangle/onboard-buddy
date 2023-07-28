@@ -69,7 +69,9 @@ export class AppComponent {
     this.inputText = '';
   }
 
-  // Chaining time
+  // When onboarding content is on/true, for each question, 2 queries are done
+  // The 1st query is an array of keywords to determine which string most likely relates to the original question
+  // The 2nd will include the docContent string that supposedly relates most to the question
   async doLangchainStuff(msg: any) {
     let msgForInput = msg;
     const tempItem = {
@@ -77,15 +79,12 @@ export class AppComponent {
       response: '...'
     }
     this.respArr.push(tempItem);
-
-
     if (this.isOnboardHelp) {
       const midMsg = msg
         + ` Which of the below array of keywords most relates to the question above?
           Respond with only the number representing the array and nothing else.
           If you are not sure which relates most to the question above, then return '-1'`
         + docCategories;
-      
       const midResp = await this.chain.call({
         input: midMsg,
       });
