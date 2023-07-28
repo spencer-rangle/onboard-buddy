@@ -1,19 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboard Buddy</title>
+    <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
 <!-- Toolbar -->
 <div class="toolbar" role="banner">
   <button class="popup-btn" (click)="togglePopup()">Personality</button>
-  <span class="personality-span">{{ curPersonalityName }}</span>
-  <div class="onboard-container" (click)="toggleOnboarding()">
-    <span class="onboard-title">ABC Corp Onboarding</span>
-    <span *ngIf="isOnboardHelp" class="onboard-true">TRUE</span>
-    <span *ngIf="!isOnboardHelp" class="onboard-false">FALSE</span>
-
-    <!-- isOnboardHelp -->
-
-    <div class="slider-container">
-      <!-- <input type="range" [(ngModel)]="sliderValue" min="0" max="100" step="1"> -->
-      <!-- <p>Slider Value: {{ sliderValue }}</p> -->
-    </div>
-  </div>
 </div>
 
 <div *ngIf="isShowPopup" class="pop-overlay" (click)="hidePopup()">
@@ -22,8 +19,8 @@
       <span>Select Chatbot Personality</span>
     </div>
     <ul>
-      <li (click)="handleMenuItemClick({ name: 'None', prompt: '' })">None</li>
-      <li *ngFor="let personality of personalities" (click)="handleMenuItemClick(personality)">
+      <li (click)="handleMenuItemClick('')">None</li>
+      <li *ngFor="let personality of personalities" (click)="handleMenuItemClick(personality.prompt)">
         {{ personality.name }}
       </li>
     </ul>
@@ -54,5 +51,6 @@
     </form>
   </footer>
 </div>
-
-<router-outlet></router-outlet>
+<script src="./app.js"></script>
+</body>
+</html>
